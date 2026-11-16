@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reed Catalog</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reeds">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{--u:min(1vw,1.7778vh);--bg:#f6f4ef;--panel:#fff;--ink:#2b2622;--mute:#8a8178;--acc:#8a5a2b;--blue:#d6ecff;--line:#e4ddd2;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1a17;--panel:#27231f;--ink:#efe9e1;--mute:#a0958a;--acc:#d49a5a;--blue:#1f3b55;--line:#3a342e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1a17;--panel:#27231f;--ink:#efe9e1;--mute:#a0958a;--acc:#d49a5a;--blue:#1f3b55;--line:#3a342e;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;font-family:Georgia,"Times New Roman",serif}
+body{display:flex;align-items:center;justify-content:center;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#stage{position:relative;width:calc(var(--u)*100);height:calc(var(--u)*56.25);background:var(--bg);color:var(--ink);display:flex;overflow:hidden;font-size:calc(var(--u)*1.5)}
+nav{width:calc(var(--u)*16);background:var(--panel);border-right:1px solid var(--line);padding:calc(var(--u)*2) 0;display:flex;flex-direction:column}
+nav h1{font-size:calc(var(--u)*1.8);margin:0 calc(var(--u)*2) calc(var(--u)*2);color:var(--acc)}
+nav button{all:unset;cursor:pointer;padding:calc(var(--u)*1.1) calc(var(--u)*2);font-size:calc(var(--u)*1.7);color:var(--mute)}
+nav button.on{color:var(--ink);background:var(--bg);border-left:calc(var(--u)*.35) solid var(--acc);padding-left:calc(var(--u)*1.65)}
+main{flex:1;padding:calc(var(--u)*2.5) calc(var(--u)*3);overflow:auto;min-width:0}
+h2{margin:0 0 calc(var(--u)*1.5);font-size:calc(var(--u)*2.6);font-weight:normal}
+.grid{display:grid;grid-template-columns:repeat(12,calc(var(--u)*4.4));gap:calc(var(--u)*1.2);justify-content:start}
+.cell{text-align:center;border:1px solid var(--mute);margin:0;height:calc(var(--u)*12);display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*1.68) 0 0;font-size:calc(var(--u)*1.3);cursor:pointer}
+.cell:hover{text-decoration:underline}
+.cell{background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 530 1770'><g stroke='%23000' stroke-width='8' stroke-linejoin='round'><polygon points='25,40 52,12 482,12 510,48 390,892 120,892' fill='%23f1e3c3'/><rect x='120' y='892' width='270' height='233' fill='%23e1c076'/><rect x='120' y='1125' width='270' height='237' fill='%230f008f'/><path d='M120 1362H390C430 1420 452 1500 452 1590 452 1680 430 1710 390 1745V1762H120V1745C80 1710 58 1680 58 1590 58 1500 80 1420 120 1362Z' fill='%230f008f'/><path d='M117 929H394M117 937H394M117 1125H394M117 1131H394' stroke='%23eba51e' stroke-width='8'/></g></svg>") center/contain no-repeat;color:#1a1612;font-weight:bold}.cell.box{background-color:var(--blue)}
+.add{display:flex;gap:calc(var(--u)*.8);margin-bottom:calc(var(--u)*1.5)}
+input,textarea,select,button.b{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:calc(var(--u)*.4);padding:calc(var(--u)*.5) calc(var(--u)*.8)}
+button.b{cursor:pointer}
+.spec{display:flex;gap:calc(var(--u)*2.5);height:100%}
+.left{display:flex;gap:calc(var(--u)*4.5);margin-right:calc(var(--u)*3);align-items:stretch;flex:0 0 auto}
+.tl{display:flex;gap:calc(var(--u)*.6);height:calc(var(--u)*45);margin-top:calc(var(--u)*5.7);margin-left:calc(var(--u)*-1.5)}
+.tl .lab{display:flex;flex-direction:column;justify-content:space-between;font-size:calc(var(--u)*1.05);color:var(--mute);text-align:right;min-width:calc(var(--u)*6.5)}
+.tl .lab span.cur{color:var(--acc);font-weight:bold}
+.tl input[type=range]{writing-mode:vertical-lr;direction:ltr;height:100%;width:calc(var(--u)*2);padding:0;accent-color:var(--acc)}
+.imgwrap{display:flex;flex-direction:column;align-items:center}
+.tools{height:calc(var(--u)*3.5);display:flex;align-items:center}
+.pen{all:unset;cursor:pointer;font-size:calc(var(--u)*2.4);color:var(--acc)}
+#dlg{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:10}.dlgbox{background:var(--panel);color:var(--ink);border-radius:calc(var(--u)*1);padding:calc(var(--u)*3);width:calc(var(--u)*36);text-align:center}.dlgbox h3{margin:0 0 calc(var(--u)*1);font-size:calc(var(--u)*2.4);font-weight:normal}.dlgbox p{margin:0 0 calc(var(--u)*2.5);color:var(--mute)}.dlgbtn{display:flex;gap:calc(var(--u)*1.2);justify-content:center}
+.sw{display:grid;grid-template-columns:repeat(5,calc(var(--u)*1.2));gap:calc(var(--u)*.3);margin-left:calc(var(--u)*.8)}.sw i{display:block;height:calc(var(--u)*1.2);border:1px solid var(--mute);border-radius:50%;cursor:pointer}.sw i.on{outline:2px solid var(--acc);outline-offset:1px}
+.reed{position:relative;height:calc(var(--u)*45);margin-top:calc(var(--u)*2.2);aspect-ratio:530/1940}
+.dims{pointer-events:none}.dims line{stroke:var(--mute);stroke-width:1;vector-effect:non-scaling-stroke}
+.reed input.dm{background:var(--bg);color:var(--ink);border-bottom-color:var(--ink)}
+.reed svg{position:absolute;inset:0;width:100%;height:100%}
+.reed input{position:absolute;background:transparent;color:#1a1612;border:0;border-bottom:1px solid #1a1612;border-radius:0;width:calc(var(--u)*1.6);transform:translate(-50%,-50%);text-align:center;padding:calc(var(--u)*.2) 0;font-size:calc(var(--u)*1.1)}
+.reed input:focus{outline:none;border-bottom-color:#8a5a2b}
+.right{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--u)*1.2)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:calc(var(--u)*.8);padding:calc(var(--u)*1.5)}
+.row{display:flex;align-items:center;margin:calc(var(--u)*.5) 0}
+.row label{width:calc(var(--u)*8);color:var(--mute)}
+.row input[type=text],.row input[type=date]{flex:none;width:calc(var(--u)*11)}
+textarea{width:100%;flex:1;min-height:calc(var(--u)*12);resize:vertical}
+.top{display:flex;gap:calc(var(--u)*1);margin-bottom:calc(var(--u)*1)}
+.old-row{display:flex;gap:calc(var(--u)*1)}
+</style>
+</head>
+<body>
+<div id="stage">
+ <nav>
+  <h1>Reed Catalog</h1>
+  <button data-nav="home">Overview</button>
+  <button data-nav="old">Old Reeds</button>
+  <button data-nav="settings">Settings</button>
+ </nav>
+ <main id="main"></main>
+</div>
+<script>
+var KEY='reed-catalog-v1',data={reeds:[]},view={page:'home',id:null,idx:0,editing:false,msg:''};
+try{var s=localStorage.getItem(KEY);if(s)data=JSON.parse(s)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+function find(id){return data.reeds.filter(function(r){return r.id===id})[0]}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fmt(ts){var d=new Date(ts);return d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+function created(r){return r.built?Date.parse(r.built):(parseInt(String(r.id).slice(1))||0)}
+function sorted(old){
+  return data.reeds.filter(function(r){return !!r.old===old}).sort(function(a,b){
+    if(!old&&a.inBox!==b.inBox)return a.inBox?-1:1;
+    if(data.sort==='date'){var d=created(b)-created(a);if(d)return d}
+    return String(a.number).localeCompare(String(b.number),undefined,{numeric:true});
+  });
+}
+function bgUrl(c){var s="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 530 1770'><g stroke='#000' stroke-width='8' stroke-linejoin='round'><polygon points='25,40 52,12 482,12 510,48 390,892 120,892' fill='#f1e3c3'/><rect x='120' y='892' width='270' height='233' fill='#e1c076'/><rect x='120' y='1125' width='270' height='237' fill='"+c+"'/><path d='M120 1362H390C430 1420 452 1500 452 1590 452 1680 430 1710 390 1745V1762H120V1745C80 1710 58 1680 58 1590 58 1500 80 1420 120 1362Z' fill='"+c+"'/><path d='M117 929H394M117 937H394M117 1125H394M117 1131H394' stroke='#eba51e' stroke-width='8'/></g></svg>";return 'url("data:image/svg+xml,'+encodeURIComponent(s).replace(/'/g,'%27')+'")'}
+function list(old){
+  var rs=sorted(old);
+  return '<div class="grid">'+rs.map(function(r,i){var sp=(!old&&i>0&&!r.inBox&&rs[i-1].inBox)?'<div class="cell" style="grid-column:1/-1;visibility:hidden;cursor:default;width:auto;height:calc(var(--u)*1)">&nbsp;</div>':'';return sp+'<div class="cell'+(r.inBox&&!old?' box':'')+'" data-open="'+r.id+'"'+(r.color?" style='background-image:"+bgUrl(r.color)+"'":'')+'>'+esc(r.number||'–')+'</div>'}).join('')+'</div>'+(rs.length?'':'<p style="color:var(--mute)">No reeds here yet.</p>');
+}
+var POS=[[21.7,6.6],[50,6.6],[78.3,6.6],[50,12.6],[50,18.6],[50,24.6],[50,30.6],[50,36.6],[50,42.6],[50,48.7],[21.7,12.6],[78.3,12.6],[21.7,24.6],[78.3,24.6],[-4,32],[50,-1],[91,77.2]];
+var TIPS={14:'Blade length',15:'Blade width at top edge',16:'Length of the part below the blade'};
+var DIMS='<svg class="dims" viewBox="0 0 100 100" preserveAspectRatio="none" style="overflow:visible"><line x1="-4" y1="9.38" x2="-4" y2="54.74"/><line x1="-6" y1="9.38" x2="4.72" y2="9.38"/><line x1="-6" y1="54.74" x2="22.6" y2="54.74"/><line x1="4.72" y1="-1" x2="96.2" y2="-1"/><line x1="4.72" y1="-3" x2="4.72" y2="9.38"/><line x1="96.2" y1="-3" x2="96.2" y2="9.38"/><line x1="91" y1="54.74" x2="91" y2="99.59"/><line x1="73.6" y1="54.74" x2="93" y2="54.74"/><line x1="73.6" y1="99.59" x2="93" y2="99.59"/></svg>';
+var SVG='<svg viewBox="0 -170 530 1940" stroke="#000" stroke-width="5" stroke-linejoin="round"><polygon points="25,40 52,12 482,12 510,48 390,892 120,892" fill="#f1e3c3"/><rect x="120" y="892" width="270" height="233" fill="#e1c076"/><rect x="120" y="1125" width="270" height="237" fill="#0f008f"/><path d="M120 1362H390C430 1420 452 1500 452 1590 452 1680 430 1710 390 1745V1762H120V1745C80 1710 58 1680 58 1590 58 1500 80 1420 120 1362Z" fill="#0f008f"/><g stroke="#eba51e" stroke-width="6"><path d="M117 929H394M117 937H394M117 1125H394M117 1131H394"/></g></svg>';
+var COLS=['#d62828','#f77f00','#f2c200','#2e9e44','#17a2b8','#0f008f','#7b2cbf','#e83e8c','#7a4a21','#1a1a1a'];
+function swatches(r){var c=r.color||'#0f008f';return '<div class="sw">'+COLS.map(function(x){return '<i data-col="'+x+'" title="Reed colour" style="background:'+x+'" class="'+(x===c?'on':'')+'"></i>'}).join('')+'</div>'}
+function render(){
+  var m=document.getElementById('main'),h='';
+  document.querySelectorAll('nav button').forEach(function(b){var n=b.dataset.nav;b.className=(n===view.page||(view.page==='spec'&&n===(find(view.id)&&find(view.id).old?'old':'home')))?'on':''});
+  if(view.page==='home'){
+    h='<h2>Overview</h2><div class="add"><button class="b" data-act="add">+ Add reed</button><span style="flex:1"></span><label>Sort by <select id="sort"><option value="number"'+(data.sort==='date'?'':' selected')+'>Number</option><option value="date"'+(data.sort==='date'?' selected':'')+'>Date built (newest first)</option></select></label></div>'+list(false);
+  }else if(view.page==='old'){
+    h='<h2>Old Reeds</h2>'+list(true);
+  }else if(view.page==='settings'){
+    h='<h2>Settings</h2><p style="color:var(--mute)">Data is stored in this browser. Copy the backup text to keep it safe or move it elsewhere.</p><textarea id="bk" style="min-height:'+'calc(var(--u)*20)'+'">'+esc(JSON.stringify(data))+'</textarea><div class="top" style="margin-top:1em"><button class="b" data-act="import">Import backup</button><button class="b" data-act="reset">Delete all data</button></div><p>'+esc(view.msg)+'</p>';
+  }else{
+    var r=find(view.id),n=r.entries.length,e=n?r.entries[n-1-view.idx]:null,ed=n===0||(view.editing&&view.idx===0);
+    var labs=r.entries.slice().reverse().map(function(x,i){return '<span class="'+(i===view.idx?'cur':'')+'">'+new Date(x.ts).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit'})+'</span>'}).join('');
+    var boxes=POS.map(function(p,i){return '<input data-v="'+i+'" '+(TIPS[i]?'class="dm" title="'+TIPS[i]+'" ':'')+'inputmode="numeric" maxlength="2" '+(ed?'':'readonly ')+'style="left:'+p[0]+'%;top:'+p[1]+'%" value="'+esc(e?e.v[i]:'')+'">'}).join('');
+    h='<div class="spec"><div class="left"><div class="tl"><div class="lab">'+(labs||'<span>No entries</span>')+'</div><input type="range" id="tl" min="0" max="'+Math.max(0,n-1)+'" value="'+view.idx+'" '+(n<2?'disabled':'')+'></div>'
+     +'<div class="imgwrap"><div class="tools">'+(n?'<button class="pen" data-act="pen" title="Edit measurements">'+(view.editing?'✓':'✎')+'</button>':'')+swatches(r)+'</div><div class="reed">'+SVG.split('#0f008f').join(r.color||'#0f008f')+DIMS+boxes+'</div></div></div>'
+     +'<div class="right"><div class="top"><button class="b" data-nav="'+(r.old?'old':'home')+'">← Back</button><label style="display:flex;gap:.5em;align-items:center;cursor:pointer;border:1px solid var(--line);border-radius:calc(var(--u)*.4);padding:calc(var(--u)*.5) calc(var(--u)*.8);background:var(--panel)"><input type="checkbox" data-f="inBox" '+(r.inBox?'checked':'')+'> in Reedbox</label><span style="flex:1"></span><button class="b" data-act="arch">'+(r.old?'Restore to Overview':'Move to Old Reeds')+'</button>'+('<button class="b" data-act="del" title="Delete reed" aria-label="Delete reed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;width:calc(var(--u)*1.7);height:calc(var(--u)*1.7)"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg></button>')+'</div>'
+     +'<div class="card" style="display:grid;grid-template-columns:1fr 1fr;column-gap:calc(var(--u)*2.5)"><div><div class="row"><label>Number:</label><input type="text" data-f="number" value="'+esc(r.number)+'"></div><div class="row"><label>Cane:</label><input type="text" data-f="cane" value="'+esc(r.cane)+'"></div><div class="row"><label>Piece:</label><input type="text" data-f="piece" value="'+esc(r.piece)+'"></div></div><div><div class="row"><label>Built on:</label><input type="date" data-f="built" value="'+esc(r.built)+'"></div><div class="row"><label>Opened on:</label><input type="date" data-f="opened" value="'+esc(r.opened)+'"></div></div></div>'
+     
+     +'<div class="card" style="flex:1;display:flex;flex-direction:column"><div style="color:var(--mute);margin-bottom:.4em">Notes:</div><textarea data-f="notes">'+esc(r.notes)+'</textarea></div></div></div>';
+  }
+  m.innerHTML=h;
+  var dl=document.getElementById('dlg');if(dl)dl.remove();
+  if(view.page==='spec'&&view.confirmDel){dl=document.createElement('div');dl.id='dlg';dl.innerHTML='<div class="dlgbox"><h3>Delete this reed?</h3><p>The reed with all its measurements and notes will be deleted permanently. This cannot be undone.</p><div class="dlgbtn"><button class="b" data-act="delno">Cancel</button><button class="b" data-act="delyes" style="color:#fff;background:#b3261e;border-color:#b3261e">Yes, delete</button></div></div>';document.getElementById('stage').appendChild(dl)}
+}
+document.addEventListener('click',function(ev){
+  var t=ev.target.closest('[data-nav],[data-open],[data-act],[data-col]');if(!t)return;
+  if(t.dataset.nav){view={page:t.dataset.nav,id:null,idx:0,editing:false,msg:''};render();return}
+  if(t.dataset.open){view={page:'spec',id:t.dataset.open,idx:0,editing:false,msg:''};render();return}
+  if(t.dataset.col){var rc=find(view.id);rc.color=t.dataset.col;save();render();return}
+  var a=t.dataset.act,r=view.id&&find(view.id);
+  if(a==='add'){var nid='r'+Date.now();data.reeds.push({id:nid,number:'',cane:'',piece:'',built:'',opened:'',inBox:false,notes:'',old:false,entries:[]});save();view={page:'spec',id:nid,idx:0,editing:false,msg:''};render()}
+  else if(a==='pen'){
+    if(view.editing){view.editing=false}
+    else{var last=r.entries[r.entries.length-1];r.entries.push({ts:Date.now(),v:last.v.slice()});view.idx=0;view.editing=true;save()}
+    render();
+  }
+  else if(a==='del'){view.confirmDel=true;render()}
+  else if(a==='delno'){view.confirmDel=false;render()}
+  else if(a==='delyes'){data.reeds=data.reeds.filter(function(x){return x.id!==r.id});save();view={page:r.old?'old':'home',id:null,idx:0,editing:false,msg:''};render()}
+  else if(a==='arch'){r.old=!r.old;save();view={page:r.old?'old':'home',id:null,idx:0,editing:false,msg:''};render()}
+  else if(a==='import'){try{var d=JSON.parse(document.getElementById('bk').value);if(!d.reeds)throw 0;data=d;save();view.msg='Backup imported.'}catch(e){view.msg='Import failed: invalid backup text.'}render()}
+  else if(a==='reset'){if(view.msg==='Click again to confirm deleting everything.'){data={reeds:[]};save();view.msg='All data deleted.'}else view.msg='Click again to confirm deleting everything.';render()}
+});
+document.addEventListener('input',function(ev){
+  var t=ev.target,r=view.id&&find(view.id);
+  if(t.id==='sort'){data.sort=t.value;save();render();return}
+  if(!r)return;
+  if(t.id==='tl'){view.idx=+t.value;view.editing=false;var n=r.entries.length,e=r.entries[n-1-view.idx];document.querySelectorAll('.reed input').forEach(function(inp){inp.value=e?(e.v[+inp.dataset.v]||''):'';inp.readOnly=!(n===0)});document.querySelectorAll('.lab span').forEach(function(s,i){s.className=i===view.idx?'cur':''});var pn=document.querySelector('.pen');if(pn)pn.textContent='✎';return}
+  if(t.dataset.v!==undefined){
+    if(t.readOnly)return;
+    t.value=t.value.replace(/\D/g,'').slice(0,2);
+    if(!r.entries.length){r.entries.push({ts:Date.now(),v:['','','','','','','','','','','','','','']});view.editing=true;view.idx=0}
+    r.entries[r.entries.length-1-view.idx].v[+t.dataset.v]=t.value;save();return;
+  }
+  if(t.dataset.f){r[t.dataset.f]=t.type==='checkbox'?t.checked:t.value;save()}
+});
+render();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+</script>
+</body>
+</html>
